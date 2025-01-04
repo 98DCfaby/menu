@@ -52,60 +52,18 @@ def eliminar_platillo(request, platillo_id):
         return redirect('menu_principal')
     return render(request, 'menu/eliminar_platillo.html', {'platillo': platillo})
 
+# Calificación y comentarios
 def agregar_comentario(request, platillo_id):
     platillo = get_object_or_404(Platillo, id=platillo_id)
-    
-    # Obtener los comentarios existentes
-    comentarios = platillo.comentarios.all()
-    
     if request.method == 'POST':
         usuario = request.POST['usuario']
         comentario = request.POST['comentario']
         calificacion = int(request.POST['calificacion'])
-        
         Comentario.objects.create(platillo=platillo, usuario=usuario, comentario=comentario, calificacion=calificacion)
-        
         # Actualiza calificación promedio
-        comentarios = platillo.comentarios.all()  # Volver a obtener comentarios actualizados
-        promedio = sum(c.calificacion for c in comentarios) / comentarios.count()
-        platillo.calificacion_promedio = promedio
-        platillo.save()
-
-        return redirect('detalle_platillo', platillo_id=platillo.id)
-
-    return render(request, 'menu/agregar_comentario.html', {'platillo': platillo, 'comentarios': comentarios})
-def editar_comentario(request, platillo_id, comentario_id):
-    platillo = get_object_or_404(Platillo, id=platillo_id)
-    comentario = get_object_or_404(Comentario, id=comentario_id, platillo=platillo)
-    
-    if request.method == 'POST':
-        comentario.usuario = request.POST['usuario']
-        comentario.comentario = request.POST['comentario']
-        comentario.calificacion = int(request.POST['calificacion'])
-        comentario.save()
-
-        # Actualizar calificación promedio
         comentarios = platillo.comentarios.all()
         promedio = sum(c.calificacion for c in comentarios) / comentarios.count()
         platillo.calificacion_promedio = promedio
         platillo.save()
-
         return redirect('detalle_platillo', platillo_id=platillo.id)
-
-    return render(request, 'menu/editar_comentario.html', {'platillo': platillo, 'comentario': comentario})
-def eliminar_comentario(request, platillo_id, comentario_id):
-    platillo = get_object_or_404(Platillo, id=platillo_id)
-    comentario = get_object_or_404(Comentario, id=comentario_id, platillo=platillo)
-    
-    if request.method == 'POST':
-        comentario.delete()
-
-        # Actualizar calificación promedio
-        comentarios = platillo.comentarios.all()
-        promedio = sum(c.calificacion for c in comentarios) / comentarios.count() if comentarios.count() > 0 else 0
-        platillo.calificacion_promedio = promedio
-        platillo.save()
-
-        return redirect('detalle_platillo', platillo_id=platillo.id)
-
-    return render(request, 'menu/eliminar_comentario.html', {'platillo': platillo, 'comentario': comentario})
+    return render(request, 'menu/agregar_comentario.html', {'platillo': platillo})
